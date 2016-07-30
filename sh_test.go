@@ -48,5 +48,5 @@ func TestEcho_ToFile_Cat_Du_Grep_For(t *testing.T) {
 
 func TestRun(t *testing.T) {
 	assert.Equal(t, "package sh", <-Head(Run("cat", "sh.go"), 1))
-	assert.Equal(t, 169, Wc(Run("cat", "sh.go")))
+	assert.Equal(t, 170, Wc(Run("cat", "sh.go")))
 }
