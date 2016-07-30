@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"os/exec"
 	"path"
 	"regexp"
 	"strings"
@@ -139,5 +140,30 @@ func For(in chan string, h Filter) chan string {
 		}
 		close(out)
 	}()
+	return out
+}
+
+func Run(name string, arg ...string) chan string {
+	cmd := exec.Command(name, arg...)
+
+	pr, pw := io.Pipe()
+	cmd.Stdout = pw
+
+	out := make(chan string)
+
+	go func() {
+		s := bufio.NewScanner(pr)
+		for s.Scan() {
+			out <- s.Text()
+		}
+		close(out) // stops reader of out.
+	}()
+
+	go func() {
+		cmd.Run()
+		pr.Close() // stops s.Scan().
+		pw.Close()
+	}()
+
 	return out
 }
