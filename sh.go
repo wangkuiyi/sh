@@ -143,6 +143,7 @@ func For(in chan string, h Filter) chan string {
 	return out
 }
 
+// Run executes a command line and collects it stdout line-by-line.
 func Run(name string, arg ...string) chan string {
 	cmd := exec.Command(name, arg...)
 
