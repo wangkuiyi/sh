@@ -168,3 +168,20 @@ func Run(name string, arg ...string) chan string {
 
 	return out
 }
+
+// Cut cuts each line read from in by delim, and returns the field-th
+// field if there are enough number of fields. NOTE: field is 1-based,
+// as the shell command cut.
+func Cut(in chan string, field int, delim string) chan string {
+	out := make(chan string)
+	go func() {
+		for x := range in {
+			fs := strings.Split(x, delim)
+			if len(fs) >= field {
+				out <- fs[field-1]
+			}
+		}
+		close(out)
+	}()
+	return out
+}
