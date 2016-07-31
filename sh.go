@@ -2,6 +2,7 @@ package sh
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -132,6 +133,9 @@ func Run(name string, arg ...string) chan string {
 	pr, pw := io.Pipe()
 	cmd.Stdout = pw
 
+	var err bytes.Buffer
+	cmd.Stderr = &err
+
 	out := make(chan string)
 
 	go func() {
@@ -143,7 +147,10 @@ func Run(name string, arg ...string) chan string {
 	}()
 
 	go func() {
-		cmd.Run()
+		if e := cmd.Run(); e != nil {
+			// Don't panic here, because panics by a goroutine cannot be covered.
+			log.Printf("Failed %s %v: %v, with output\n%s", name, arg, e, err.String())
+		}
 		pr.Close() // stops s.Scan().
 		pw.Close()
 	}()
