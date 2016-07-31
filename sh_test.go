@@ -1,7 +1,9 @@
 package sh
 
 import (
+	"fmt"
 	"io/ioutil"
+	"os"
 	"path"
 	"testing"
 
@@ -48,11 +50,20 @@ func TestEcho_ToFile_Cat_Du_Grep_For(t *testing.T) {
 
 func TestRun(t *testing.T) {
 	assert.Equal(t, "package sh", <-Head(Run("cat", "sh.go"), 1))
-	assert.Equal(t, 187, Wc(Run("cat", "sh.go")))
+	assert.Equal(t, 217, Wc(Run("cat", "sh.go")))
 }
 
 func TestCut(t *testing.T) {
 	out := Cut(Echo("a=apple\nsome\nb=banana\nc"), 2, "=")
 	assert.Equal(t, "apple", <-out)
 	assert.Equal(t, "banana", <-out)
+}
+
+func ExampleFor() {
+	fmt.Println(Wc(For(Grep(Du("."), "\\.go$"), func(x string, out chan string) {
+		if ToFile(Grep(Cat(x), "func For"), os.DevNull) > 0 {
+			out <- x
+		}
+	})))
+	// output: 2
 }
